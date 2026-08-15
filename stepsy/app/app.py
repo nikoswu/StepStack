@@ -6,6 +6,7 @@ from io import StringIO
 import os
 
 app = Flask(__name__)
+# Stepsy API application
 
 client = InfluxDBClient(
     url=os.environ["INFLUX_URL"],
