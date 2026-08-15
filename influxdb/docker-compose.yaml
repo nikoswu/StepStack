@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=nikoswu
+      - DOCKER_INFLUXDB_INIT_PASSWORD=matad0Rath!na7
+      - DOCKER_INFLUXDB_INIT_ORG=stepsy
+      - DOCKER_INFLUXDB_INIT_BUCKET=steps
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=Zx8Kq29sLmP4vR7xTn9Y_aBcDeFgHiJk
+    networks:
+      - nginx_proxy
+
+volumes:
+  influxdb_data:
+
+networks:
+  nginx_proxy:
+    external: true
