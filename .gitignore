@@ -1,0 +1,12 @@
+# Stepsy user data
+stepsy/StepsUpload/
+
+# Environment variables / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Local development
+.vscode/
