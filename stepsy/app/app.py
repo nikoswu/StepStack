@@ -61,7 +61,7 @@ def upload_form():
 
 @app.route("/")
 def home():
-    return "Stepsy API is running"
+    return "Stepsy API is running - development version"
 
 
 if __name__ == "__main__":
