@@ -1,0 +1,40 @@
+services:
+
+  stepsy-api:
+    build:
+      context: ./stepsy/app
+    container_name: stepsy-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+      INFLUX_ORG: stepsy
+      INFLUX_BUCKET: steps
+    depends_on:
+      - influxdb
+    networks:
+      - stepsy-network
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: stepsy-influxdb
+    restart: unless-stopped
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_USERNAME}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
+      DOCKER_INFLUXDB_INIT_ORG: stepsy
+      DOCKER_INFLUXDB_INIT_BUCKET: steps
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
+    networks:
+      - stepsy-network
+
+volumes:
+  influxdb_data:
+
+networks:
+  stepsy-network:

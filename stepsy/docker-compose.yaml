@@ -1,19 +1,14 @@
-version: "3.8"
-
 services:
   stepsy-api:
-    image: python:3.11-slim
+    build:
+      context: ./app
     container_name: stepsy-api
     restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - ./app:/app
-    command: sh -c "pip install flask influxdb-client && python app.py"
     environment:
-      - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=5eTrQRS0je4EmSkhIu7XAjk2ZF9UsTaNId9rImPKqHLUdi1pi7A6EWrd9G0fW52GHL0FBgCBEPO39yqMCpxfjw==
-      - INFLUX_ORG=stepsy
-      - INFLUX_BUCKET=steps
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+      INFLUX_ORG: stepsy
+      INFLUX_BUCKET: steps
     networks:
       - nginx_proxy
 
