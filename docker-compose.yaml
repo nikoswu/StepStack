@@ -33,8 +33,22 @@ services:
     networks:
       - stepsy-network
 
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: stepsy-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - influxdb
+    networks:
+      - stepsy-network
+
 volumes:
   influxdb_data:
+  grafana_data:
 
 networks:
   stepsy-network:
