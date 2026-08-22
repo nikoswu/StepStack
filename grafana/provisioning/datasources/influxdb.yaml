@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB-Stepsy
+    uid: stepsy-influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+
+    jsonData:
+      version: Flux
+      organization: stepsy
+      defaultBucket: steps
+
+    secureJsonData:
+      token: ${INFLUX_TOKEN}
