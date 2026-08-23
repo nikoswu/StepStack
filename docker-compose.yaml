@@ -6,7 +6,7 @@ services:
     container_name: stepsy-api
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "${API_PORT:-5000}:5000"
     environment:
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: ${INFLUX_TOKEN}
@@ -38,7 +38,9 @@ services:
     container_name: stepsy-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
