@@ -9,11 +9,12 @@ echo "================================="
 echo
 
 # --------------------------------------------------
-# Check requirements
+# Check Docker
 # --------------------------------------------------
 
 if ! command -v docker >/dev/null 2>&1; then
     echo "ERROR: Docker is not installed."
+    echo "Please install Docker and try again."
     exit 1
 fi
 
@@ -28,14 +29,15 @@ echo "✓ Docker Compose found"
 echo
 
 # --------------------------------------------------
-# Check existing configuration
+# Existing configuration
 # --------------------------------------------------
 
 if [ -f ".env" ]; then
     echo "WARNING: A .env file already exists."
-    read -rp "Overwrite existing configuration? [y/N]: " overwrite
 
-    if [[ "$overwrite" != "y" && "$overwrite" != "Y" ]]; then
+    read -rp "Overwrite existing configuration? [y/N]: " OVERWRITE
+
+    if [[ ! "$OVERWRITE" =~ ^[Yy]$ ]]; then
         echo "Setup cancelled. Existing configuration was not changed."
         exit 0
     fi
@@ -44,51 +46,60 @@ if [ -f ".env" ]; then
 fi
 
 # --------------------------------------------------
-# Port handling
+# Port configuration
 # --------------------------------------------------
 
 port_in_use() {
-    local port="$1"
-
-    ss -ltnH 2>/dev/null | awk -v port="$port" '
-        $4 ~ ":" port "$" {
-            found=1
-        }
-        END {
-            exit !found
-        }
-    '
-}
-
-choose_port() {
-    local service="$1"
-    local default_port="$2"
-    local port
-
-    while true; do
-        read -rp "$service port [$default_port]: " port
-        port="${port:-$default_port}"
-
-        if ! [[ "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-            echo "Please enter a valid port between 1 and 65535." >&2
-            continue
-        fi
-
-        if port_in_use "$port"; then
-            echo "Port $port is already in use. Please choose another port." >&2
-            continue
-        fi
-
-        printf '%s\n' "$port"
-        return 0
-    done
+    if command -v ss >/dev/null 2>&1; then
+        ss -ltn | awk '{print $4}' | grep -qE ":$1$"
+    elif command -v netstat >/dev/null 2>&1; then
+        netstat -ltn | awk '{print $4}' | grep -qE ":$1$"
+    else
+        return 1
+    fi
 }
 
 echo "Configure application ports:"
 echo
 
-API_PORT=$(choose_port "Stepsy API" "5000")
-GRAFANA_PORT=$(choose_port "Grafana" "3000")
+while true; do
+    read -rp "Stepsy API port [5000]: " API_PORT
+    API_PORT="${API_PORT:-5000}"
+
+    if ! [[ "$API_PORT" =~ ^[0-9]+$ ]] || [ "$API_PORT" -lt 1 ] || [ "$API_PORT" -gt 65535 ]; then
+        echo "Please enter a valid port number between 1 and 65535."
+        continue
+    fi
+
+    if port_in_use "$API_PORT"; then
+        echo "Port $API_PORT is already in use. Please choose another port."
+        continue
+    fi
+
+    break
+done
+
+while true; do
+    read -rp "Grafana port [3000]: " GRAFANA_PORT
+    GRAFANA_PORT="${GRAFANA_PORT:-3000}"
+
+    if ! [[ "$GRAFANA_PORT" =~ ^[0-9]+$ ]] || [ "$GRAFANA_PORT" -lt 1 ] || [ "$GRAFANA_PORT" -gt 65535 ]; then
+        echo "Please enter a valid port number between 1 and 65535."
+        continue
+    fi
+
+    if [ "$GRAFANA_PORT" = "$API_PORT" ]; then
+        echo "Grafana port cannot be the same as the Stepsy API port."
+        continue
+    fi
+
+    if port_in_use "$GRAFANA_PORT"; then
+        echo "Port $GRAFANA_PORT is already in use. Please choose another port."
+        continue
+    fi
+
+    break
+done
 
 echo
 echo "Selected ports:"
@@ -110,24 +121,26 @@ while true; do
     read -rsp "InfluxDB password: " INFLUX_PASSWORD
     echo
 
-    if [ -z "$INFLUX_PASSWORD" ]; then
-        echo "Password cannot be empty."
+    PASSWORD_LENGTH=${#INFLUX_PASSWORD}
+
+    if [ "$PASSWORD_LENGTH" -lt 8 ] || [ "$PASSWORD_LENGTH" -gt 72 ]; then
+        echo "Password must be between 8 and 72 characters long."
         continue
     fi
 
     break
 done
 
-# Generate a secure random token
+# --------------------------------------------------
+# Generate secure token
+# --------------------------------------------------
+
 if command -v openssl >/dev/null 2>&1; then
     INFLUX_TOKEN=$(openssl rand -hex 32)
 else
     echo "ERROR: OpenSSL is required to generate a secure token."
     exit 1
 fi
-
-echo "✓ Secure InfluxDB token generated"
-echo
 
 # --------------------------------------------------
 # Create .env file
@@ -153,26 +166,26 @@ echo
 
 echo "Validating Docker Compose configuration..."
 
-if docker compose config >/dev/null; then
-    echo "✓ Docker Compose configuration is valid"
-else
+if ! docker compose config >/dev/null; then
     echo "ERROR: Docker Compose configuration is invalid."
     exit 1
 fi
 
+echo "✓ Docker Compose configuration is valid"
 echo
 
 # --------------------------------------------------
-# Optional startup
+# Start application
 # --------------------------------------------------
 
-read -rp "Start Stepsy now? [Y/n]: " start_stepsy
-start_stepsy="${start_stepsy:-Y}"
+read -rp "Start Stepsy now? [Y/n]: " START_NOW
+START_NOW="${START_NOW:-Y}"
 
-if [[ "$start_stepsy" == "Y" || "$start_stepsy" == "y" ]]; then
+if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
 
     echo
     echo "Starting Stepsy..."
+    echo
 
     docker compose up -d --build
 
@@ -188,10 +201,11 @@ if [[ "$start_stepsy" == "Y" || "$start_stepsy" == "y" ]]; then
 else
 
     echo
-    echo "Setup complete."
+    echo "Setup complete!"
     echo
-    echo "Start Stepsy later with:"
+    echo "You can start Stepsy with:"
     echo
     echo "    docker compose up -d --build"
     echo
+
 fi
