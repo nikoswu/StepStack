@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import csv
@@ -6,6 +6,7 @@ from io import StringIO
 import os
 
 app = Flask(__name__)
+
 # Stepsy API application
 
 client = InfluxDBClient(
@@ -16,10 +17,10 @@ client = InfluxDBClient(
 
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
-# ✅ Upload endpoint (μένει ίδιο)
+
 @app.route("/upload", methods=["POST"])
 def upload():
-    file = request.files['file']
+    file = request.files["file"]
     content = file.read().decode("utf-8")
 
     reader = csv.reader(StringIO(content))
@@ -35,28 +36,28 @@ def upload():
         except:
             continue
 
-        point = Point("steps") \
-            .field("count", steps) \
+        point = (
+            Point("steps")
+            .field("count", steps)
             .time(date)
+        )
 
         points.append(point)
 
-    write_api.write(bucket=os.environ["INFLUX_BUCKET"], record=points)
+    write_api.write(
+        bucket=os.environ["INFLUX_BUCKET"],
+        record=points
+    )
 
-    return {"status": "ok", "points": len(points)}
+    return {
+        "status": "ok",
+        "points": len(points)
+    }
 
 
-# 🆕 Upload page (ΑΥΤΟ προσθέσαμε)
 @app.route("/upload-form")
 def upload_form():
-    return render_template_string("""
-        <h2>Upload Steps CSV</h2>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <br><br>
-            <input type="submit" value="Upload">
-        </form>
-    """)
+    return render_template("upload.html")
 
 
 @app.route("/")
