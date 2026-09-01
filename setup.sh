@@ -64,6 +64,7 @@ echo
 
 while true; do
     read -rp "Stepsy API port [5000]: " API_PORT
+
     API_PORT="${API_PORT:-5000}"
 
     if ! [[ "$API_PORT" =~ ^[0-9]+$ ]] || [ "$API_PORT" -lt 1 ] || [ "$API_PORT" -gt 65535 ]; then
@@ -81,6 +82,7 @@ done
 
 while true; do
     read -rp "Grafana port [3000]: " GRAFANA_PORT
+
     GRAFANA_PORT="${GRAFANA_PORT:-3000}"
 
     if ! [[ "$GRAFANA_PORT" =~ ^[0-9]+$ ]] || [ "$GRAFANA_PORT" -lt 1 ] || [ "$GRAFANA_PORT" -gt 65535 ]; then
@@ -115,6 +117,7 @@ echo "Configure InfluxDB:"
 echo
 
 read -rp "InfluxDB username [stepsy]: " INFLUX_USERNAME
+
 INFLUX_USERNAME="${INFLUX_USERNAME:-stepsy}"
 
 while true; do
@@ -179,6 +182,7 @@ echo
 # --------------------------------------------------
 
 read -rp "Start Stepsy now? [Y/n]: " START_NOW
+
 START_NOW="${START_NOW:-Y}"
 
 if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
@@ -194,18 +198,39 @@ if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
     echo "       Stepsy is running!"
     echo "================================="
     echo
-    echo "Stepsy API: http://localhost:$API_PORT"
-    echo "Grafana:    http://localhost:$GRAFANA_PORT"
+
+    echo "Open Stepsy and upload your CSV:"
+    echo
+    echo "    http://localhost:$API_PORT/upload-form"
+    echo
+
+    echo "Other services:"
+    echo
+    echo "    Stepsy API: http://localhost:$API_PORT"
+    echo "    Grafana:    http://localhost:$GRAFANA_PORT"
     echo
 
 else
 
     echo
-    echo "Setup complete!"
+    echo "================================="
+    echo "        Setup complete!"
+    echo "================================="
     echo
-    echo "You can start Stepsy with:"
+
+    echo "Start Stepsy with:"
     echo
     echo "    docker compose up -d --build"
+    echo
+
+    echo "After Stepsy starts, open:"
+    echo
+    echo "    http://localhost:$API_PORT/upload-form"
+    echo
+
+    echo "Grafana will be available at:"
+    echo
+    echo "    http://localhost:$GRAFANA_PORT"
     echo
 
 fi
