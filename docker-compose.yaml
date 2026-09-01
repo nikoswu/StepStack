@@ -12,6 +12,7 @@ services:
       INFLUX_TOKEN: ${INFLUX_TOKEN}
       INFLUX_ORG: stepsy
       INFLUX_BUCKET: steps
+      GRAFANA_PORT: ${GRAFANA_PORT:-3000}
     depends_on:
       - influxdb
     networks:
