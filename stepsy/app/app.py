@@ -33,7 +33,7 @@ def upload():
         try:
             date = row[0].strip() + "T00:00:00Z"
             steps = float(row[1].strip())
-        except:
+        except (ValueError, IndexError):
             continue
 
         point = (
@@ -57,7 +57,12 @@ def upload():
 
 @app.route("/upload-form")
 def upload_form():
-    return render_template("upload.html")
+    grafana_port = os.environ.get("GRAFANA_PORT", "3000")
+
+    return render_template(
+        "upload.html",
+        grafana_port=grafana_port
+    )
 
 
 @app.route("/")
