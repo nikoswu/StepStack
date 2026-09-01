@@ -1,142 +1,163 @@
 # Stepsy
 
-A self-hosted step tracking stack built with:
+A simple self-hosted step tracking stack.
 
-* Flask API
-* InfluxDB
-* Grafana
-* Docker Compose
+Upload your walking data as a CSV file, store it in InfluxDB, and visualize it with Grafana.
 
-Steps are uploaded as a CSV file through the Stepsy API, stored in InfluxDB, and visualized in Grafana.
+```text
+CSV → Stepsy API → InfluxDB → Grafana
+```
+
+---
 
 ## Architecture
 
-```text
-CSV file
-   │
-   ▼
-Stepsy API
-   │
-   ▼
-InfluxDB
-   │
-   ▼
-Grafana Dashboard
+```mermaid
+flowchart LR
+    A[📄 Stepsy CSV] --> B[🚀 Stepsy API]
+    B --> C[(📊 InfluxDB)]
+    C --> D[📈 Grafana Dashboard]
 ```
+
+Stepsy consists of three services:
+
+* **Stepsy API** — accepts and imports CSV step data
+* **InfluxDB** — stores the step data
+* **Grafana** — visualizes the data
+
+---
 
 ## Requirements
 
-Before starting, make sure the following are installed:
+Before starting, make sure you have:
 
 * Docker Engine
 * Docker Compose
 
-Verify the installation:
+Verify your installation:
 
 ```bash
 docker --version
 docker compose version
 ```
 
-## Installation
+---
+
+# Quick Start
 
 Clone the repository:
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone git@github.com:nikoswu/stepsy-api.git
 cd stepsy-api
 ```
 
-Create your local environment configuration:
+Run the setup wizard:
 
 ```bash
-cp .env.example .env
+./setup.sh
 ```
 
-Edit `.env`:
+The setup wizard will:
 
-```bash
-nano .env
+* Check that Docker is installed
+* Check that Docker Compose is available
+* Ask you to choose the Stepsy API port
+* Ask you to choose the Grafana port
+* Ask for an InfluxDB username
+* Ask for an InfluxDB password
+* Generate a secure InfluxDB token
+* Create your local `.env` configuration
+* Validate the Docker Compose configuration
+* Optionally start the complete stack
+
+Your `.env` file contains local credentials and is ignored by Git.
+
+---
+
+## Installation Flow
+
+```mermaid
+flowchart TD
+    A[Clone repository] --> B[Run setup.sh]
+    B --> C[Configure ports]
+    C --> D[Configure InfluxDB credentials]
+    D --> E[Generate secure token]
+    E --> F[Create .env]
+    F --> G[Validate Docker Compose]
+    G --> H[Start Stepsy]
+
+    H --> I[🚀 Stepsy API]
+    H --> J[(📊 InfluxDB)]
+    H --> K[📈 Grafana]
 ```
 
-Configure the following values:
+---
 
-```env
-# InfluxDB initial setup
-INFLUX_USERNAME=stepsy
-INFLUX_PASSWORD=change_this_password
-INFLUX_TOKEN=replace_with_a_long_random_token
+# Accessing Stepsy
 
-# Application ports
-API_PORT=5000
-GRAFANA_PORT=3000
-```
+The ports are chosen during setup.
 
-### Important
-
-Choose a strong password and a long random token.
-
-The `.env` file contains local credentials and is not committed to Git.
-
-## Start Stepsy
-
-Start the complete stack:
-
-```bash
-docker compose up -d --build
-```
-
-This starts:
-
-* Stepsy API
-* InfluxDB
-* Grafana
-
-Check that all containers are running:
-
-```bash
-docker compose ps
-```
-
-## Access the services
-
-### Stepsy API
+If you selected:
 
 ```text
-http://SERVER_IP:5000
+API_PORT=5555
+GRAFANA_PORT=3333
 ```
 
-Health check:
+you can access the services using:
+
+### Stepsy upload page
 
 ```text
-http://SERVER_IP:5000/health
+http://localhost:5555/upload-form
 ```
 
-CSV upload page:
+### API health check
 
 ```text
-http://SERVER_IP:5000/upload-form
+http://localhost:5555/health
 ```
 
 ### Grafana
 
 ```text
-http://SERVER_IP:3000
+http://localhost:3333
 ```
 
-If you changed `API_PORT` or `GRAFANA_PORT` in `.env`, use those ports instead.
-
-The InfluxDB datasource and Stepsy dashboard are automatically provisioned when Grafana starts.
-
-## Upload step data
-
-Open:
+For a remote server, replace `localhost` with your server IP or domain:
 
 ```text
-http://SERVER_IP:5000/upload-form
+http://SERVER_IP:API_PORT/upload-form
 ```
 
-Upload a CSV file using the following format:
+or:
+
+```text
+https://steps.example.com/upload-form
+```
+
+when using a reverse proxy and HTTPS.
+
+---
+
+# Upload Step Data
+
+Open the Stepsy upload page:
+
+```text
+http://SERVER_IP:API_PORT/upload-form
+```
+
+Select a CSV file exported from Stepsy.
+
+The CSV format should be:
+
+```text
+YYYY-MM-DD,STEP_COUNT
+```
+
+Example:
 
 ```csv
 2026-04-18,6032
@@ -144,19 +165,33 @@ Upload a CSV file using the following format:
 2026-04-20,10461
 ```
 
-Format:
+After a successful upload:
 
-```text
-YYYY-MM-DD,STEP_COUNT
+1. The CSV data is processed by the Stepsy API.
+2. The step data is stored in InfluxDB.
+3. The upload page confirms how many data points were imported.
+4. A button appears that opens your Grafana dashboard.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Stepsy API
+    participant I as InfluxDB
+    participant G as Grafana
+
+    U->>A: Upload CSV
+    A->>A: Process CSV
+    A->>I: Store step data
+    I-->>A: Success
+    A-->>U: Upload complete
+    U->>G: View dashboard
 ```
 
-After uploading, the data is written to InfluxDB.
+---
 
-Open Grafana and select the Stepsy dashboard to view the data.
+# Docker Services
 
-## Docker services
-
-The stack consists of:
+Stepsy runs three Docker containers:
 
 ```text
 stepsy-api
@@ -164,26 +199,58 @@ stepsy-influxdb
 stepsy-grafana
 ```
 
-All services communicate through an internal Docker network.
+The services communicate through an internal Docker network:
 
-InfluxDB and Grafana data are stored in Docker volumes:
+```mermaid
+flowchart LR
+    A[Stepsy API] <--> B[(InfluxDB)]
+    C[Grafana] <--> B
+```
+
+InfluxDB and Grafana data are stored in persistent Docker volumes:
 
 ```text
 influxdb_data
 grafana_data
 ```
 
-These volumes persist data when containers are restarted or recreated.
+Your data remains available when containers are restarted or recreated.
 
-## Updating the deployment
+---
 
-Pull the latest version:
+# Useful Commands
+
+## Check running containers
 
 ```bash
-git pull
+docker compose ps
 ```
 
-Rebuild and update the stack:
+## View container logs
+
+```bash
+docker compose logs
+```
+
+Follow logs in real time:
+
+```bash
+docker compose logs -f
+```
+
+View logs for a specific service:
+
+```bash
+docker compose logs -f stepsy-api
+```
+
+## Restart the stack
+
+```bash
+docker compose restart
+```
+
+## Rebuild and start
 
 ```bash
 docker compose up -d --build
@@ -191,43 +258,128 @@ docker compose up -d --build
 
 ## Stop the stack
 
-Stop the containers:
-
 ```bash
 docker compose down
 ```
 
-This does not remove your InfluxDB or Grafana data.
+Stopping the stack does **not** delete your InfluxDB or Grafana data.
 
-## Remove all data
+---
 
-Warning: this permanently deletes the stored InfluxDB and Grafana data.
+# Updating Stepsy
+
+Pull the latest version:
+
+```bash
+git pull
+```
+
+Rebuild and restart the stack:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+# Configuration
+
+The setup wizard creates a local `.env` file.
+
+Example:
+
+```env
+# InfluxDB initial setup
+INFLUX_USERNAME=stepsy
+INFLUX_PASSWORD=your_secure_password
+INFLUX_TOKEN=automatically_generated_secure_token
+
+# Application ports
+API_PORT=5000
+GRAFANA_PORT=3000
+```
+
+You normally do not need to edit this file manually.
+
+If you change the ports later, restart the stack:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+# Advanced Manual Setup
+
+If you prefer not to use the setup wizard, create the environment file manually:
+
+```bash
+cp .env.example .env
+```
+
+Edit it:
+
+```bash
+nano .env
+```
+
+Then start Stepsy:
+
+```bash
+docker compose up -d --build
+```
+
+Make sure that:
+
+* The InfluxDB password is between 8 and 72 characters.
+* The API and Grafana ports are valid and not already in use.
+* The InfluxDB token is long and randomly generated.
+
+---
+
+# Security
+
+The `.env` file contains local configuration and credentials.
+
+It is excluded from Git using `.gitignore`:
+
+```text
+.env
+```
+
+**Never commit your `.env` file to GitHub.**
+
+The `.env.example` file contains only example values and is safe to keep in the repository.
+
+For internet-facing deployments, it is recommended to use:
+
+* A reverse proxy
+* HTTPS
+* Authentication where appropriate
+
+---
+
+# Remove All Data
+
+> ⚠️ **Warning:** This permanently deletes all stored InfluxDB and Grafana data.
+
+Run:
 
 ```bash
 docker compose down -v
 ```
 
-## Configuration
+This removes the containers and Docker volumes.
 
-The `.env` file controls:
+---
 
-| Variable          | Description                                          | Default      |
-| ----------------- | ---------------------------------------------------- | ------------ |
-| `INFLUX_USERNAME` | InfluxDB administrator username                      | `stepsy`     |
-| `INFLUX_PASSWORD` | InfluxDB administrator password                      | User defined |
-| `INFLUX_TOKEN`    | Token used by the API and Grafana to access InfluxDB | User defined |
-| `API_PORT`        | Port exposed by the Stepsy API                       | `5000`       |
-| `GRAFANA_PORT`    | Port exposed by Grafana                              | `3000`       |
+# Development
 
-## Security
+Install the development dependencies:
 
-Do not commit your `.env` file.
-
-The `.env.example` file contains only placeholder values and can safely remain in the repository.
-
-For an internet-facing deployment, consider placing the API and Grafana behind a reverse proxy with HTTPS.
-
-## Development
+```bash
+pip install -r requirements-dev.txt
+```
 
 Run the test suite:
 
@@ -235,31 +387,63 @@ Run the test suite:
 pytest
 ```
 
-## Deployment
+---
 
-The project is designed to be deployed with a single Docker Compose command:
-
-```bash
-docker compose up -d --build
-```
-
-A new deployment should follow this process:
+# Project Structure
 
 ```text
-Clone repository
-        │
-        ▼
-Create .env from .env.example
-        │
-        ▼
-Configure credentials and ports
-        │
-        ▼
-docker compose up -d --build
-        │
-        ├── Stepsy API starts
-        ├── InfluxDB initializes
-        └── Grafana provisions
-              ├── InfluxDB datasource
-              └── Stepsy dashboard
+stepsy-api/
+├── .github/                 GitHub Actions workflows
+├── grafana/
+│   ├── dashboards/          Stepsy dashboard definitions
+│   └── provisioning/        Grafana provisioning
+├── stepsy/
+│   └── app/
+│       ├── app.py           Flask application
+│       ├── Dockerfile
+│       └── templates/
+│           └── upload.html  CSV upload interface
+├── tests/
+├── docker-compose.yaml
+├── setup.sh
+├── .env.example
+└── README.md
 ```
+
+---
+
+# Deployment
+
+Stepsy is designed to run as a self-hosted Docker Compose stack.
+
+```mermaid
+flowchart TD
+    A[Server or VPS] --> B[Docker]
+    B --> C[Stepsy API]
+    B --> D[InfluxDB]
+    B --> E[Grafana]
+
+    U[User] --> C
+    U --> E
+```
+
+For a public deployment, you can place Stepsy behind a reverse proxy and use your own domain:
+
+```text
+https://steps.example.com
+        │
+        ▼
+Reverse Proxy
+        │
+        ├── Stepsy API
+        │
+        └── Grafana
+```
+
+---
+
+## License
+
+This project is currently provided as a personal self-hosted project.
+
+You can add a license file later depending on how you want others to use, modify, and distribute the project.
