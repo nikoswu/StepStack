@@ -3,7 +3,7 @@
 set -e
 
 echo "================================="
-echo "       Welcome to Stepsy"
+echo "       Welcome to StepStack"
 echo "         Setup Wizard"
 echo "================================="
 echo
@@ -63,7 +63,7 @@ echo "Configure application ports:"
 echo
 
 while true; do
-    read -rp "Stepsy API port [5000]: " API_PORT
+    read -rp "StepStack API port [5000]: " API_PORT
 
     API_PORT="${API_PORT:-5000}"
 
@@ -91,7 +91,7 @@ while true; do
     fi
 
     if [ "$GRAFANA_PORT" = "$API_PORT" ]; then
-        echo "Grafana port cannot be the same as the Stepsy API port."
+        echo "Grafana port cannot be the same as the StepStack API port."
         continue
     fi
 
@@ -105,7 +105,7 @@ done
 
 echo
 echo "Selected ports:"
-echo "Stepsy API: $API_PORT"
+echo "StepStack API: $API_PORT"
 echo "Grafana:    $GRAFANA_PORT"
 echo
 
@@ -116,9 +116,9 @@ echo
 echo "Configure InfluxDB:"
 echo
 
-read -rp "InfluxDB username [stepsy]: " INFLUX_USERNAME
+read -rp "InfluxDB username [stepstack]: " INFLUX_USERNAME
 
-INFLUX_USERNAME="${INFLUX_USERNAME:-stepsy}"
+INFLUX_USERNAME="${INFLUX_USERNAME:-stepstack}"
 
 while true; do
     read -rsp "InfluxDB password: " INFLUX_PASSWORD
@@ -181,32 +181,32 @@ echo
 # Start application
 # --------------------------------------------------
 
-read -rp "Start Stepsy now? [Y/n]: " START_NOW
+read -rp "Start StepStack now? [Y/n]: " START_NOW
 
 START_NOW="${START_NOW:-Y}"
 
 if [[ "$START_NOW" =~ ^[Yy]$ ]]; then
 
     echo
-    echo "Starting Stepsy..."
+    echo "Starting StepStack..."
     echo
 
     docker compose up -d --build
 
     echo
     echo "================================="
-    echo "       Stepsy is running!"
+    echo "       StepStack is running!"
     echo "================================="
     echo
 
-    echo "Open Stepsy and upload your CSV:"
+    echo "Open StepStack and upload your CSV:"
     echo
     echo "    http://localhost:$API_PORT/upload-form"
     echo
 
     echo "Other services:"
     echo
-    echo "    Stepsy API: http://localhost:$API_PORT"
+    echo "    StepStack API: http://localhost:$API_PORT"
     echo "    Grafana:    http://localhost:$GRAFANA_PORT"
     echo
 
@@ -218,12 +218,12 @@ else
     echo "================================="
     echo
 
-    echo "Start Stepsy with:"
+    echo "Start StepStack with:"
     echo
     echo "    docker compose up -d --build"
     echo
 
-    echo "After Stepsy starts, open:"
+    echo "After StepStack starts, open:"
     echo
     echo "    http://localhost:$API_PORT/upload-form"
     echo
