@@ -48,8 +48,8 @@ docker compose version
 Clone the repository:
 
 ```bash
-git clone git@github.com:nikoswu/stepstack-api.git
-cd stepstack-api
+git clone git@github.com:nikoswu/stepstack.git
+cd stepstack
 ```
 
 Run the setup wizard:
