@@ -7,7 +7,7 @@ import os
 
 app = Flask(__name__)
 
-# Stepsy API application
+# StepStack API application
 
 client = InfluxDBClient(
     url=os.environ["INFLUX_URL"],
@@ -67,7 +67,7 @@ def upload_form():
 
 @app.route("/")
 def home():
-    return "Stepsy API is running - development version"
+    return "StepStack API is running - development version"
 
 
 @app.route("/health")

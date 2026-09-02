@@ -63,7 +63,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -7d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> last()"
@@ -145,7 +145,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -7d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> mean()"
@@ -227,7 +227,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> mean()"
@@ -309,7 +309,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -90d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> max()"
@@ -391,7 +391,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -90d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> aggregateWindow(every: 1d, fn: mean, createEmpty: false)\r\n  |> yield(name: \"daily_steps\")"
@@ -507,7 +507,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "from(bucket: \"steps\")\r\n  |> range(start: -90d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> aggregateWindow(every: 1w, fn: sum, createEmpty: false)\r\n  |> yield(name: \"weekly_steps\")"
@@ -623,7 +623,7 @@
                       "group": "influxdb",
                       "version": "v0",
                       "datasource": {
-                        "name": "stepsy-influxdb"
+                        "name": "stepstack-influxdb"
                       },
                       "spec": {
                         "query": "import \"date\"\r\n\r\nfrom(bucket: \"steps\")\r\n  |> range(start: -90d)\r\n  |> filter(fn: (r) => r._measurement == \"steps\")\r\n  |> filter(fn: (r) => r._field == \"count\")\r\n  |> map(fn: (r) => ({\r\n      weekday: if date.weekDay(t: r._time) == 0 then \"Sunday\"\r\n        else if date.weekDay(t: r._time) == 1 then \"Monday\"\r\n        else if date.weekDay(t: r._time) == 2 then \"Tuesday\"\r\n        else if date.weekDay(t: r._time) == 3 then \"Wednesday\"\r\n        else if date.weekDay(t: r._time) == 4 then \"Thursday\"\r\n        else if date.weekDay(t: r._time) == 5 then \"Friday\"\r\n        else \"Saturday\",\r\n      value: r._value\r\n  }))\r\n  |> group(columns: [\"weekday\"])\r\n  |> mean(column: \"value\")\r\n  |> group()\r\n  |> keep(columns: [\"weekday\", \"value\"])\r\n  |> sort(columns: [\"weekday\"])"
@@ -835,7 +835,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Stepsy Dashboard - Design",
+    "title": "StepStack Dashboard",
     "variables": [],
     "preferences": {
       "layout": {

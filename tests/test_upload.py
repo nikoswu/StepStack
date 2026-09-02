@@ -4,10 +4,10 @@ from unittest.mock import patch
 
 os.environ["INFLUX_URL"] = "http://localhost:8086"
 os.environ["INFLUX_TOKEN"] = "test-token"
-os.environ["INFLUX_ORG"] = "stepsy"
+os.environ["INFLUX_ORG"] = "stepstack"
 os.environ["INFLUX_BUCKET"] = "steps"
 
-from stepsy.app.app import app
+from stepstack.app.app import app
 
 
 def test_upload():
@@ -15,7 +15,7 @@ def test_upload():
 
     csv_data = "2026-08-19,1234\n"
 
-    with patch("stepsy.app.app.write_api.write") as mock_write:
+    with patch("stepstack.app.app.write_api.write") as mock_write:
         response = client.post(
             "/upload",
             data={
