@@ -1,4 +1,4 @@
-# Stepsy
+# Stepsy-API
 
 A simple self-hosted step tracking stack.
 
