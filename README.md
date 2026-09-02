@@ -5,7 +5,7 @@ A simple self-hosted step tracking stack.
 Upload your walking data as a CSV file, store it in InfluxDB, and visualize it with Grafana.
 
 ```text
-CSV → Stepsy API → InfluxDB → Grafana
+CSV → Stepsy-API → InfluxDB → Grafana
 ```
 
 ---
@@ -14,14 +14,14 @@ CSV → Stepsy API → InfluxDB → Grafana
 
 ```mermaid
 flowchart LR
-    A[📄 Stepsy CSV] --> B[🚀 Stepsy API]
+    A[📄 Stepsy CSV] --> B[🚀 Stepsy-API]
     B --> C[(📊 InfluxDB)]
     C --> D[📈 Grafana Dashboard]
 ```
 
-Stepsy consists of three services:
+Stepsy-API consists of three services:
 
-* **Stepsy API** — accepts and imports CSV step data
+* **Stepsy-API** — accepts and imports CSV step data
 * **InfluxDB** — stores the step data
 * **Grafana** — visualizes the data
 
@@ -62,7 +62,7 @@ The setup wizard will:
 
 * Check that Docker is installed
 * Check that Docker Compose is available
-* Ask you to choose the Stepsy API port
+* Ask you to choose the API port
 * Ask you to choose the Grafana port
 * Ask for an InfluxDB username
 * Ask for an InfluxDB password
@@ -85,16 +85,16 @@ flowchart TD
     D --> E[Generate secure token]
     E --> F[Create .env]
     F --> G[Validate Docker Compose]
-    G --> H[Start Stepsy]
+    G --> H[Start Stepsy-API]
 
-    H --> I[🚀 Stepsy API]
+    H --> I[🚀 Stepsy-API]
     H --> J[(📊 InfluxDB)]
     H --> K[📈 Grafana]
 ```
 
 ---
 
-# Accessing Stepsy
+# Accessing Stepsy-API
 
 The ports are chosen during setup.
 
@@ -107,7 +107,7 @@ GRAFANA_PORT=3333
 
 you can access the services using:
 
-### Stepsy upload page
+### Upload page
 
 ```text
 http://localhost:5555/upload-form
@@ -143,13 +143,13 @@ when using a reverse proxy and HTTPS.
 
 # Upload Step Data
 
-Open the Stepsy upload page:
+Open the upload page:
 
 ```text
 http://SERVER_IP:API_PORT/upload-form
 ```
 
-Select a CSV file exported from Stepsy.
+Select a CSV file exported from the Stepsy application.
 
 The CSV format should be:
 
@@ -167,7 +167,7 @@ Example:
 
 After a successful upload:
 
-1. The CSV data is processed by the Stepsy API.
+1. The CSV data is processed by Stepsy-API.
 2. The step data is stored in InfluxDB.
 3. The upload page confirms how many data points were imported.
 4. A button appears that opens your Grafana dashboard.
@@ -175,7 +175,7 @@ After a successful upload:
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant A as Stepsy API
+    participant A as Stepsy-API
     participant I as InfluxDB
     participant G as Grafana
 
@@ -191,7 +191,7 @@ sequenceDiagram
 
 # Docker Services
 
-Stepsy runs three Docker containers:
+Stepsy-API runs three Docker containers:
 
 ```text
 stepsy-api
@@ -203,7 +203,7 @@ The services communicate through an internal Docker network:
 
 ```mermaid
 flowchart LR
-    A[Stepsy API] <--> B[(InfluxDB)]
+    A[Stepsy-API] <--> B[(InfluxDB)]
     C[Grafana] <--> B
 ```
 
@@ -266,7 +266,7 @@ Stopping the stack does **not** delete your InfluxDB or Grafana data.
 
 ---
 
-# Updating Stepsy
+# Updating Stepsy-API
 
 Pull the latest version:
 
@@ -323,7 +323,7 @@ Edit it:
 nano .env
 ```
 
-Then start Stepsy:
+Then start Stepsy-API:
 
 ```bash
 docker compose up -d --build
@@ -395,7 +395,7 @@ pytest
 stepsy-api/
 ├── .github/                 GitHub Actions workflows
 ├── grafana/
-│   ├── dashboards/          Stepsy dashboard definitions
+│   ├── dashboards/          Dashboard definitions
 │   └── provisioning/        Grafana provisioning
 ├── stepsy/
 │   └── app/
@@ -414,12 +414,12 @@ stepsy-api/
 
 # Deployment
 
-Stepsy is designed to run as a self-hosted Docker Compose stack.
+Stepsy-API is designed to run as a self-hosted Docker Compose stack.
 
 ```mermaid
 flowchart TD
     A[Server or VPS] --> B[Docker]
-    B --> C[Stepsy API]
+    B --> C[Stepsy-API]
     B --> D[InfluxDB]
     B --> E[Grafana]
 
@@ -427,7 +427,7 @@ flowchart TD
     U --> E
 ```
 
-For a public deployment, you can place Stepsy behind a reverse proxy and use your own domain:
+For a public deployment, you can place Stepsy-API behind a reverse proxy and use your own domain:
 
 ```text
 https://steps.example.com
@@ -435,7 +435,7 @@ https://steps.example.com
         ▼
 Reverse Proxy
         │
-        ├── Stepsy API
+        ├── Stepsy-API
         │
         └── Grafana
 ```
