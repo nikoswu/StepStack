@@ -1,26 +1,28 @@
+name: stepstack
+
 services:
 
-  stepsy-api:
+  stepstack-api:
     build:
-      context: ./stepsy/app
-    container_name: stepsy-api
+      context: ./stepstack/app
+    container_name: stepstack-api
     restart: unless-stopped
     ports:
       - "${API_PORT:-5000}:5000"
     environment:
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: ${INFLUX_TOKEN}
-      INFLUX_ORG: stepsy
+      INFLUX_ORG: stepstack
       INFLUX_BUCKET: steps
       GRAFANA_PORT: ${GRAFANA_PORT:-3000}
     depends_on:
       - influxdb
     networks:
-      - stepsy-network
+      - stepstack-network
 
   influxdb:
     image: influxdb:2.7
-    container_name: stepsy-influxdb
+    container_name: stepstack-influxdb
     restart: unless-stopped
     volumes:
       - influxdb_data:/var/lib/influxdb2
@@ -28,15 +30,15 @@ services:
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_USERNAME}
       DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
-      DOCKER_INFLUXDB_INIT_ORG: stepsy
+      DOCKER_INFLUXDB_INIT_ORG: stepstack
       DOCKER_INFLUXDB_INIT_BUCKET: steps
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
     networks:
-      - stepsy-network
+      - stepstack-network
 
   grafana:
     image: grafana/grafana-oss:latest
-    container_name: stepsy-grafana
+    container_name: stepstack-grafana
     restart: unless-stopped
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
@@ -49,11 +51,15 @@ services:
     depends_on:
       - influxdb
     networks:
-      - stepsy-network
+      - stepstack-network
 
 volumes:
   influxdb_data:
+    name: stepstack_influxdb_data
+
   grafana_data:
+    name: stepstack_grafana_data
 
 networks:
-  stepsy-network:
+  stepstack-network:
+    name: stepstack_network

@@ -1,5 +1,5 @@
-# Stepsy user data
-stepsy/StepsUpload/
+# StepStack user data
+stepstack/StepsUpload/
 
 # Environment variables / secrets
 .env
