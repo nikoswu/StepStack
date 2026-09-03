@@ -4,9 +4,25 @@ A simple self-hosted step tracking stack.
 
 Upload your walking data as a CSV file, store it in InfluxDB, and visualize it with Grafana.
 
+> **Important:** StepStack is designed to import CSV files exported from **Stepsy**.
+> You can also use CSV files from another source, provided they follow the required format:
+>
+> ```text
+> YYYY-MM-DD,STEP_COUNT
+> ```
+>
+> Example:
+>
+> ```csv
+> 2026-04-18,6032
+> 2026-04-19,8450
+> 2026-04-20,10461
+> ```
+
 ```text
 CSV → StepStack API → InfluxDB → Grafana
 ```
+
 
 ---
 
