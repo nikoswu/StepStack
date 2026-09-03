@@ -140,7 +140,14 @@ http://localhost:5555/health
 ```text
 http://localhost:3333
 ```
+### First login
 
+For the initial Grafana login, use:
+
+```text
+Username: admin
+Password: admin
+```
 For a remote server, replace `localhost` with your server IP or domain:
 
 ```text
