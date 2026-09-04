@@ -23,7 +23,6 @@ Upload your walking data as a CSV file, store it in InfluxDB, and visualize it w
 CSV → StepStack API → InfluxDB → Grafana
 ```
 
-
 ---
 
 ## Architecture
@@ -64,8 +63,8 @@ docker compose version
 Clone the repository:
 
 ```bash
-git clone git@github.com:nikoswu/stepstack.git
-cd stepstack
+git clone git@github.com:nikoswu/StepStack.git
+cd StepStack
 ```
 
 Run the setup wizard:
@@ -112,7 +111,7 @@ flowchart TD
 
 # Accessing StepStack
 
-The ports are chosen during setup.
+The ports are chosen during setup and are bound to `127.0.0.1`.
 
 If you selected:
 
@@ -121,26 +120,27 @@ API_PORT=5555
 GRAFANA_PORT=3333
 ```
 
-you can access the services using:
+you can access the services locally on the server using:
 
 ### StepStack upload page
 
 ```text
-http://localhost:5555/upload-form
+http://127.0.0.1:5555/upload-form
 ```
 
 ### API health check
 
 ```text
-http://localhost:5555/health
+http://127.0.0.1:5555/health
 ```
 
 ### Grafana
 
 ```text
-http://localhost:3333
+http://127.0.0.1:3333
 ```
-### First login
+
+## First Grafana login
 
 For the initial Grafana login, use:
 
@@ -148,19 +148,43 @@ For the initial Grafana login, use:
 Username: admin
 Password: admin
 ```
-For a remote server, replace `localhost` with your server IP or domain:
+
+Grafana will prompt you to change the default password after your first login.
+
+---
+
+## Remote Access
+
+By default, StepStack does **not expose its API or Grafana ports directly to the internet**.
+
+The services are bound to:
 
 ```text
-http://SERVER_IP:API_PORT/upload-form
+127.0.0.1
 ```
 
-or:
+This means they are only accessible from the server itself.
+
+For external access, it is recommended to use a reverse proxy such as Nginx Proxy Manager, Caddy, or Traefik.
+
+Example:
 
 ```text
-https://steps.example.com/upload-form
+Internet
+   │
+   ▼
+Reverse Proxy
+   │
+   ├── StepStack API → 127.0.0.1:API_PORT
+   │
+   └── Grafana → 127.0.0.1:GRAFANA_PORT
 ```
 
-when using a reverse proxy and HTTPS.
+This allows you to use your own domain and HTTPS:
+
+```text
+https://steps.example.com
+```
 
 ---
 
@@ -169,8 +193,10 @@ when using a reverse proxy and HTTPS.
 Open the StepStack upload page:
 
 ```text
-http://SERVER_IP:API_PORT/upload-form
+http://127.0.0.1:API_PORT/upload-form
 ```
+
+If you are accessing StepStack remotely, use the domain configured in your reverse proxy.
 
 Select a CSV file exported from Stepsy.
 
@@ -228,6 +254,14 @@ The services communicate through an internal Docker network:
 flowchart LR
     A[StepStack API] <--> B[(InfluxDB)]
     C[Grafana] <--> B
+```
+
+InfluxDB is only available inside the StepStack Docker network.
+
+The API and Grafana ports are published only on:
+
+```text
+127.0.0.1
 ```
 
 InfluxDB and Grafana data are stored in persistent Docker volumes:
@@ -374,11 +408,18 @@ It is excluded from Git using `.gitignore`:
 
 The `.env.example` file contains only example values and is safe to keep in the repository.
 
-For internet-facing deployments, it is recommended to use:
+By default:
 
-* A reverse proxy
+* StepStack API is bound to `127.0.0.1`
+* Grafana is bound to `127.0.0.1`
+* InfluxDB is available only inside the Docker network
+* No StepStack service ports are directly exposed to the internet
+
+For external access, use a reverse proxy with:
+
 * HTTPS
 * Authentication where appropriate
+* Your own domain or subdomain
 
 ---
 
@@ -415,7 +456,7 @@ pytest
 # Project Structure
 
 ```text
-stepstack-api/
+StepStack/
 ├── .github/                 GitHub Actions workflows
 ├── grafana/
 │   ├── dashboards/          StepStack dashboard definitions
@@ -446,11 +487,12 @@ flowchart TD
     B --> D[InfluxDB]
     B --> E[Grafana]
 
-    U[User] --> C
-    U --> E
+    U[User] --> F[Reverse Proxy]
+    F --> C
+    F --> E
 ```
 
-For a public deployment, you can place StepStack behind a reverse proxy and use your own domain:
+For a public deployment, place StepStack behind a reverse proxy:
 
 ```text
 https://steps.example.com
@@ -459,8 +501,12 @@ https://steps.example.com
 Reverse Proxy
         │
         ├── StepStack API
+        │       │
+        │       └── 127.0.0.1:API_PORT
         │
         └── Grafana
+                │
+                └── 127.0.0.1:GRAFANA_PORT
 ```
 
 ---
